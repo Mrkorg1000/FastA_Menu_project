@@ -1,7 +1,5 @@
 # FastA_menu_project
-Fast Api training project
-
-Task1:
+### Fast Api training project
 
 Тренировочный проект на FAST API
 
