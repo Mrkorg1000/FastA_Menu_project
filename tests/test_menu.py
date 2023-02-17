@@ -26,7 +26,8 @@ def test_create_menu(client, session_test):
     )
     assert resp.status_code == 201
     id = resp.json()["id"]
-    menu = get_menu_by_id(session_test, id)
+    menu = session_test.query(Menu).\
+        filter(Menu.id == id).first()
     assert resp.json() == menu_to_dict(menu)
 
 
@@ -80,7 +81,7 @@ def test_delete_menu(client, session_test):
     assert resp.json() == {
         'status': True,
         'message': 'The menu has been deleted',
-    }
+     }
 
 
 
