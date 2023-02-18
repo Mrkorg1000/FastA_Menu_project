@@ -52,55 +52,18 @@ def test_menu(session_test):
     return menu
 
 
+@fixture(scope="module")
+def test_submenu(session_test, test_menu):
+    submenu = Submenu(
+        title="My test submenu",
+        description="Test submenu description",
+        menu_id = test_menu.id
+    )
+    session_test.add(submenu)
+    session_test.commit()
+    session_test.refresh(submenu)
+    return submenu
 
-# @fixture(scope='module')
-# def create_menu_id(session_test):   
-#     title = 's_menu 1'
-#     description = 's_menu 1 description'
-#     menu = Menu(title=title, description=description)
-#     session_test.add(menu)
-#     session_test.commit()
-#     session_test.refresh(menu)
-#     return menu.id
-
-
-# @fixture(scope='module')
-# def create_menu_submenu_ids(client, create_menu_id):
-#     menu_id = create_menu_id
-#     resp = client.post(router_for_sub.format(
-#             menu_id=menu_id),
-#             json={'title': 'My 1submenu', 'description': 'My 1submenu description'},
-#             )
-#     submenu_id = resp.json()["id"]
-#     return menu_id, submenu_id
-    
-# @fixture()
-# def menu_id_from_db(session_test):
-#     menu = session_test.query(Menu).first()
-#     return menu.id
-
-
-# @fixture()
-# def submenu_id_from_db(session_test):
-#     submenu = session_test.query(Submenu).first()
-#     return submenu.id
-
-
-# def get_menu_by_id(session_test, menu_id):
-#     menu = session_test.query(Menu).filter(Menu.id == menu_id).first()
-#     return menu
-
-
-# def get_submenu_by_id(session_test, submenu_id):
-#     submenu = session_test.query(Submenu).filter(Submenu.id == submenu_id).first()
-#     return submenu
-
-
-# def get_dish_by_id(session_test, dish_id):
-#     dish = session_test.query(Dish).filter(Dish.id == dish_id).first()
-#     return dish
-
-    
 
 def menu_to_dict(menu: Menu):
     return {
@@ -128,7 +91,3 @@ def dish_to_dict(dish: Dish):
         'description': str(dish.description),
         'price': str(dish.price),
     }
-
-        
-
-

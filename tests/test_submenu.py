@@ -1,5 +1,5 @@
 from conftest import *
-from database.models import Submenu
+from database.models import Submenu, Menu
 import uuid
 
 
@@ -34,11 +34,13 @@ def test_create_submenu(client, session_test, test_menu):
     assert resp.json() == submenu_to_dict(submenu)
 
 
-def test_get_submenu_list(client, session_test, test_menu):
-    resp = client.get(router.format(menu_id=test_menu.id))
+def test_get_submenu_list(client, session_test):
+    menu = session_test.query(Menu).one()
+    resp = client.get(router.format(menu_id=menu.id))
     assert resp.status_code == 200
     submenu_list = session_test.query(Submenu).all()
-    assert resp.json() == [submenu_to_dict(submenu) for submenu in submenu_list]
+    assert resp.json() == [submenu_to_dict(submenu)
+                           for submenu in submenu_list]
 
 
 def test_get_submenu_by_id(client, session_test):
@@ -75,7 +77,9 @@ def test_update_submenu(client, session_test):
         },
     )
     assert resp.status_code == 200
-    assert resp.json() == submenu_to_dict(submenu)
+    updated_submenu = session_test.query(Submenu).\
+        filter(Submenu.id == submenu_id).first()
+    assert resp.json() == submenu_to_dict(updated_submenu)
 
 
 def test_delete_submenu(client, session_test):
@@ -86,6 +90,9 @@ def test_delete_submenu(client, session_test):
         router_id.format(menu_id=menu_id, id=submenu_id)
     )
     assert resp.status_code == 200
+    deleted_submenu = session_test.query(Submenu).\
+        filter(Submenu.id == submenu_id).first()
+    assert deleted_submenu == None
     assert resp.json() == {
         'status': True,
         'message': 'The submenu has been deleted',

@@ -68,8 +68,10 @@ def test_update_menu(client, session_test):
         },
     )
     assert resp.status_code == 200
-    assert resp.json() == menu_to_dict(menu)
-
+    updated_menu = session_test.query(Menu).\
+        filter(Menu.id==menu.id).first()
+    assert resp.json() == menu_to_dict(updated_menu)
+    
 
 def test_delete_menu(client, session_test):
     menu = session_test.query(Menu).one()
@@ -78,6 +80,9 @@ def test_delete_menu(client, session_test):
         router_id.format(id=id),
     )
     assert resp.status_code == 200
+    deleted_menu = session_test.query(Menu).\
+        filter(Menu.id == menu.id).first()
+    assert deleted_menu == None
     assert resp.json() == {
         'status': True,
         'message': 'The menu has been deleted',
