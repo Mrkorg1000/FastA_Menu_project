@@ -8,6 +8,12 @@ class Settings(BaseSettings):
     db_user: str
     db_pass: str
 
+    db_host_test: str
+    db_port_test: int
+    db_name_test: str
+    db_user_test: str
+    db_pass_test: str
+
     class Config:
         env_file = ".env"
 
