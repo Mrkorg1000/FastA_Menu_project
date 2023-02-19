@@ -28,9 +28,9 @@ def test_create_submenu(client, session_test, test_menu):
               },    
     )
     assert resp.status_code == 201
-    id = resp.json()["id"]
+    submenu_id = resp.json()["id"]
     submenu = session_test.query(Submenu).\
-        filter(Submenu.id==id).first()
+        filter(Submenu.id == submenu_id).first()
     assert resp.json() == submenu_to_dict(submenu)
 
 

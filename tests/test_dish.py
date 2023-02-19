@@ -28,9 +28,9 @@ def test_create_dish(client, session_test, test_menu, test_submenu):
         },
     )
     assert resp.status_code == 201
-    id = resp.json()["id"]
+    dish_id = resp.json()["id"]
     dish = session_test.query(Dish).\
-        filter(Dish.id==id).first()
+        filter(Dish.id==dish_id).first()
     assert resp.json() == dish_to_dict(dish)
 
 

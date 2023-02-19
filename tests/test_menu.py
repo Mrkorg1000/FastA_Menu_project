@@ -25,9 +25,9 @@ def test_create_menu(client, session_test):
         json={'title': 'My menu', 'description': 'My menu description'},
     )
     assert resp.status_code == 201
-    id = resp.json()["id"]
+    menu_id = resp.json()["id"]
     menu = session_test.query(Menu).\
-        filter(Menu.id == id).first()
+        filter(Menu.id == menu_id).first()
     assert resp.json() == menu_to_dict(menu)
 
 
@@ -40,9 +40,8 @@ def test_get_menu_list(client, session_test):
 
 def test_get_menu_by_id(client, session_test):
     menu = session_test.query(Menu).one()
-    id = menu.id
     resp = client.get(
-        router_id.format(id=id),
+        router_id.format(id=menu.id),
     )
     assert resp.status_code == 200
     assert resp.json() == menu_to_dict(menu)
@@ -59,9 +58,8 @@ def test_menu_not_found(client):
 
 def test_update_menu(client, session_test):
     menu = session_test.query(Menu).one()
-    id = menu.id
     resp = client.patch(
-        router_id.format(id=id),
+        router_id.format(id=menu.id),
         json={
             'title': 'My updated menu',
             'description': 'My updated menu description',
@@ -75,9 +73,8 @@ def test_update_menu(client, session_test):
 
 def test_delete_menu(client, session_test):
     menu = session_test.query(Menu).one()
-    id = menu.id
     resp = client.delete(
-        router_id.format(id=id),
+        router_id.format(id=menu.id),
     )
     assert resp.status_code == 200
     deleted_menu = session_test.query(Menu).\
