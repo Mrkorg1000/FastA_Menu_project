@@ -1,5 +1,6 @@
 .fvenv/
 .env
+env.py
 migrations/env.py
 queries.py
 # Byte-compiled / optimized / DLL files
