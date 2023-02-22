@@ -3,3 +3,26 @@ pythonpath = [
   ".",
 ]
 
+
+[tool.poetry]
+name = "menu-project"
+version = "0.1.0"
+description = ""
+authors = ["Mrkorg1000 <korg1000@yandex.ru>"]
+readme = "README.md"
+packages = [{include = "menu_project"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "0.89.1"
+psycopg2-binary = "2.9.5"
+pytest = "7.2.1"
+uvicorn = "0.20.0"
+sqlalchemy = "1.4.46"
+pydantic = {extras = ["dotenv"], version = "^1.10.5"}
+httpx = "^0.23.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
