@@ -1,8 +1,8 @@
-"""initial migration
+"""creating project tables
 
-Revision ID: d15de74c840d
+Revision ID: 2501867bfddd
 Revises: 
-Create Date: 2023-01-29 22:41:30.348628
+Create Date: 2023-02-24 14:37:31.063660
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'd15de74c840d'
+revision = '2501867bfddd'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,8 +22,6 @@ def upgrade() -> None:
     sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('description', sa.String(), nullable=False),
-    sa.Column('submenus_count', sa.Integer(), nullable=True),
-    sa.Column('dishes_count', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('submenu',
@@ -31,7 +29,6 @@ def upgrade() -> None:
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('description', sa.String(), nullable=False),
     sa.Column('menu_id', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('dishes_count', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['menu_id'], ['menu.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )

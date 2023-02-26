@@ -60,5 +60,5 @@ def delete_single_menu(id: UUID, session: Session = Depends(get_session)):
                             )
     session.delete(single_menu)
     session.commit()
-    # session.refresh(single_menu)
+
     return {"status": True, "message": "The menu has been deleted"}

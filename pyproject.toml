@@ -21,6 +21,7 @@ uvicorn = "0.20.0"
 sqlalchemy = "1.4.46"
 pydantic = {extras = ["dotenv"], version = "^1.10.5"}
 httpx = "^0.23.3"
+alembic = "1.9.1"
 
 
 [build-system]

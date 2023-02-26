@@ -27,16 +27,6 @@ def create_dish(
     session.commit()
     session.refresh(new_dish)
 
-    submenu = session.query(Submenu).filter(Submenu.id == new_dish.submenu_id).first()
-    submenu.dishes_count += 1
-    session.commit()
-    
-
-    menu = session.query(Menu).filter(Menu.id == submenu.menu_id).first()
-    menu.dishes_count += 1
-    session.commit()
-    session.refresh(submenu)
-    session.refresh(menu)
     return new_dish
 
 
@@ -76,16 +66,5 @@ def delete_single_dish(id: UUID, session: Session = Depends(get_session)):
                             )
     session.delete(single_dish)
     session.commit()
-    # session.refresh(single_dish)
-
-    submenu = session.query(Submenu).filter(Submenu.id == single_dish.submenu_id).first()
-    submenu.dishes_count -= 1
-    session.commit()
-    session.refresh(submenu)
-
-    menu = session.query(Menu).filter(Menu.id == submenu.menu_id).first()
-    menu.dishes_count -= 1
-    session.commit()
-    session.refresh(menu)
     
     return {"status": True, "message": "The dish has been deleted"}

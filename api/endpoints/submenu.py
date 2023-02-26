@@ -26,10 +26,6 @@ def create_submenu(
     session.commit()
     session.refresh(new_submenu)
 
-    menu = session.query(Menu).filter(Menu.id==menu_id).first()
-    menu.submenus_count += 1
-    session.commit()
-    session.refresh(menu)
     return new_submenu
 
 
@@ -69,11 +65,5 @@ def delete_single_submenu(id: UUID, session: Session = Depends(get_session)):
                             )
     session.delete(single_submenu)
     session.commit()
-    # session.refresh(single_submenu)
-
-    menu = session.query(Menu).filter(Menu.id==single_submenu.menu_id).first()
-    menu.submenus_count -= 1
-    menu.dishes_count -= single_submenu.dishes_count
-    session.commit()
-    session.refresh(menu)
+    
     return {"status": True, "message": "The submenu has been deleted"}
