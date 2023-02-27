@@ -10,7 +10,7 @@ router = '/api/v1/menus'
 router_for_sub = '/api/v1/menus/{menu_id}/submenus/'
 
 SQLALCHEMY_TEST_DATABASE_URL = (
-    f"postgresql://{settings.db_user_test}:{settings.db_pass_test}@{settings.db_host_test}:{settings.db_port_test}/{settings.db_name_test}"
+    f"postgresql+asyncpg://{settings.db_user_test}:{settings.db_pass_test}@{settings.db_host_test}:{settings.db_port_test}/{settings.db_name_test}"
 )
 
 engine_test = create_engine(
