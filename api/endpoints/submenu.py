@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from database.db import get_session
 from database.models import Menu, Submenu
@@ -10,28 +11,28 @@ from uuid import UUID
 router = APIRouter()
 
 
-@router.get("/", response_model=List[SchemasSubMenu])
-def get_submenus(session: Session = Depends(get_session)):
-    submenus = session.query(Submenu).all()
-    return submenus
+@router.get("", response_model=List[SchemasSubMenu])
+async def get_submenus(session: AsyncSession = Depends(get_session)):
+    submenus = await session.execute(select(Submenu))
+    return submenus.scalars().fetchall()
 
 
-@router.post("/", response_model=SchemasSubMenu, status_code=status.HTTP_201_CREATED)
-def create_submenu(
-    menu_id: UUID, submenu: SchemaBase, session: Session = Depends(get_session)
+@router.post("", response_model=SchemasSubMenu, status_code=status.HTTP_201_CREATED)
+async def create_submenu(
+    menu_id: UUID, submenu: SchemaBase, session: AsyncSession = Depends(get_session)
     ):
     new_submenu = Submenu(**submenu.dict())
     new_submenu.menu_id = menu_id
     session.add(new_submenu)
-    session.commit()
-    session.refresh(new_submenu)
+    await session.commit()
+    await session.refresh(new_submenu)
 
     return new_submenu
 
 
 @router.get("/{id}", response_model=SchemasSubMenu)
-def get_single_submenu(id: UUID, session: Session = Depends(get_session)):
-    single_submenu = session.query(Submenu).filter(Submenu.id == id).first()
+async def get_single_submenu(id: UUID, session: AsyncSession = Depends(get_session)):
+    single_submenu = await session.get(Submenu, id)
     if not single_submenu:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="submenu not found"
@@ -40,30 +41,31 @@ def get_single_submenu(id: UUID, session: Session = Depends(get_session)):
 
 
 @router.patch("/{id}", response_model=SchemasSubMenu)
-def update_submenu(id: UUID, submenu: SchemaBase,
-                session: Session = Depends(get_session)):
-    query = session.query(Submenu).filter(Submenu.id == id)
+async def update_submenu(id: UUID, submenu: SchemaBase,
+                session: AsyncSession = Depends(get_session)):
+    db_submenu = await session.get(Submenu, id)
 
-    if not query:
+    if not db_submenu:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="submenu not found"
                             )
-    query.update(submenu.dict(exclude_unset=True))
-    session.commit()
-    updated_submenu = query.first()
-    session.refresh(updated_submenu)
+    submenu_data = submenu.dict(exclude_unset=True)
+    for key, value in submenu_data.items():
+        setattr(db_submenu, key, value)
+    await session.commit()
+    await session.refresh(db_submenu)
     
-    return updated_submenu
+    return db_submenu
 
 
 @router.delete("/{id}")
-def delete_single_submenu(id: UUID, session: Session = Depends(get_session)):
-    single_submenu = session.query(Submenu).filter(Submenu.id == id).first()
+async def delete_single_submenu(id: UUID, session: AsyncSession = Depends(get_session)):
+    single_submenu = await session.get(Submenu, id)
     if not single_submenu:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="submenu not found"
                             )
-    session.delete(single_submenu)
-    session.commit()
+    await session.delete(single_submenu)
+    await session.commit()
     
     return {"status": True, "message": "The submenu has been deleted"}

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from database.db import get_session
 from database.models import Menu, Submenu, Dish
@@ -10,29 +11,29 @@ from uuid import UUID
 router = APIRouter()
 
 
-@router.get("/", response_model=List[SchemasDish])
-def get_dishes(session: Session = Depends(get_session)):
-    dishes = session.query(Dish).all()
-    return dishes
+@router.get("", response_model=List[SchemasDish])
+async def get_dishes(session: AsyncSession = Depends(get_session)):
+    dishes = await session.execute(select(Dish))
+    return dishes.scalars().fetchall()
 
 
-@router.post("/", response_model=SchemasDish, status_code=status.HTTP_201_CREATED)
-def create_dish(
+@router.post("", response_model=SchemasDish, status_code=status.HTTP_201_CREATED)
+async def create_dish(
     submenu_id: UUID, dish: SchemasCreateUpdateDish,
-    session: Session = Depends(get_session)
+    session: AsyncSession = Depends(get_session)
 ):
     new_dish = Dish(**dish.dict())
     new_dish.submenu_id = submenu_id
     session.add(new_dish)
-    session.commit()
-    session.refresh(new_dish)
+    await session.commit()
+    await session.refresh(new_dish)
 
     return new_dish
 
 
 @router.get("/{id}", response_model=SchemasDish)
-def get_single_dish(id: UUID, session: Session = Depends(get_session)):
-    single_dish = session.query(Dish).filter(Dish.id == id).first()
+async def get_single_dish(id: UUID, session: AsyncSession = Depends(get_session)):
+    single_dish = await session.get(Dish, id)
     if not single_dish:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="dish not found"
@@ -41,30 +42,31 @@ def get_single_dish(id: UUID, session: Session = Depends(get_session)):
 
 
 @router.patch("/{id}", response_model=SchemasDish)
-def update_dish(id: UUID, dish: SchemasCreateUpdateDish,
-                   session: Session = Depends(get_session)):
-    query = session.query(Dish).filter(Dish.id == id)
+async def update_dish(id: UUID, dish: SchemasCreateUpdateDish,
+                   session: AsyncSession = Depends(get_session)):
+    db_dish = await session.get(Dish, id)
 
-    if not query:
+    if not db_dish:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="dish not found"
                             )
-    query.update(dish.dict(exclude_unset=True))
-    session.commit()
-    updated_dish = query.first()
-    session.refresh(updated_dish)
+    dish_data = dish.dict(exclude_unset=True)
+    for key, value in dish_data.items():
+        setattr(db_dish, key, value)
+    await session.commit()
+    await session.refresh(db_dish)
     
-    return updated_dish
+    return db_dish
 
 
 @router.delete("/{id}")
-def delete_single_dish(id: UUID, session: Session = Depends(get_session)):
-    single_dish = session.query(Dish).filter(Dish.id == id).first()
+async def delete_single_dish(id: UUID, session: AsyncSession = Depends(get_session)):
+    single_dish = await session.get(Dish, id)
     if not single_dish:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="dish not found"
                             )
-    session.delete(single_dish)
-    session.commit()
+    await session.delete(single_dish)
+    await session.commit()
     
     return {"status": True, "message": "The dish has been deleted"}

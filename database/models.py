@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, func, select
+from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, Float, func, select
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from sqlalchemy.dialects.mysql import FLOAT
