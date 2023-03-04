@@ -27,24 +27,26 @@ async_session_test_maker = sessionmaker(bind=engine_test, class_=AsyncSession,
                                    expire_on_commit=False)
 
 
-@fixture(scope='module')
-def event_loop():
+@fixture(scope='session')
+def event_loop(request):
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
 
 
-@fixture(scope="module")
+@fixture
 async def async_session_test() -> AsyncGenerator:
     async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     
-    async with async_session_test_maker() as session_test:
-        yield session_test
+        async with async_session_test_maker(bind=conn) as session_test:
+            yield session_test
+            await session_test.flush()
+            await session_test.rollback()
         
            
-@fixture(scope="module")
+@fixture
 async def client(async_session_test):
     def override_get_session():
         return async_session_test
@@ -53,7 +55,7 @@ async def client(async_session_test):
         yield client
 
 
-@fixture(scope="module")
+@fixture
 async def test_menu(async_session_test):
     menu = Menu(
         title = "My test menu",
@@ -65,7 +67,7 @@ async def test_menu(async_session_test):
     return menu
 
 
-@fixture(scope="module")
+@fixture
 async def test_submenu(async_session_test, test_menu):
     submenu = Submenu(
         title="My test submenu",
