@@ -21,7 +21,7 @@ SQLALCHEMY_TEST_DATABASE_URL = (
 
 engine_test = create_async_engine(
     SQLALCHEMY_TEST_DATABASE_URL, echo=True 
-)
+)   
 
 async_session_test_maker = sessionmaker(bind=engine_test, class_=AsyncSession,
                                    expire_on_commit=False)
@@ -29,10 +29,9 @@ async_session_test_maker = sessionmaker(bind=engine_test, class_=AsyncSession,
 
 @fixture(scope='session')
 def event_loop(request):
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    loop = asyncio.get_event_loop()
     yield loop
     loop.close()
-
 
 @fixture
 async def async_session_test() -> AsyncGenerator:
