@@ -31,23 +31,18 @@ async def test_create_menu(client, async_session_test):
     assert resp.json() == menu_to_dict(menu)
 
 
-async def test_get_menu_list(client, async_session_test):
+async def test_get_menu_list(client, test_menu):
     resp = await client.get(router)
     assert resp.status_code == 200
-    menu_list = (await async_session_test.\
-                 execute(select(Menu))).scalars().fetchall()
-    
-    assert resp.json() == [menu_to_dict(menu) for menu in menu_list]
+    assert resp.json() == [menu_to_dict(test_menu)]
     
 
-async def test_get_menu_by_id(client, async_session_test):
-    menu = (await async_session_test.\
-            execute(select(Menu))).scalars().first()
+async def test_get_menu_by_id(client, test_menu):
     resp = await client.get(
-        router_id.format(id=menu.id),
+        router_id.format(id=test_menu.id),
     )
     assert resp.status_code == 200
-    assert resp.json() == menu_to_dict(menu)
+    assert resp.json() == menu_to_dict(test_menu)
 
 
 async def test_menu_not_found(client):
@@ -58,11 +53,9 @@ async def test_menu_not_found(client):
     assert resp.status_code == 404
     assert resp.json() == {'detail': 'menu not found'}
 
-async def test_update_menu(client, async_session_test):
-    menu = (await async_session_test.\
-            execute(select(Menu))).scalars().first()
+async def test_update_menu(client, async_session_test, test_menu):
     resp = await client.patch(
-        router_id.format(id=menu.id),
+        router_id.format(id=test_menu.id),
         json={
             'title': 'My updated menu',
             'description': 'My updated menu description',
@@ -70,20 +63,17 @@ async def test_update_menu(client, async_session_test):
     )
     assert resp.status_code == 200
     updated_menu = await async_session_test.\
-                    get(Menu, menu.id)
-                                                             
+                    get(Menu, test_menu.id)   
     assert resp.json() == menu_to_dict(updated_menu)
     
 
-async def test_delete_menu(client, async_session_test):
-    menu = (await async_session_test.\
-            execute(select(Menu))).scalars().first()
+async def test_delete_menu(client, async_session_test, test_menu):
     resp = await client.delete(
-        router_id.format(id=menu.id),
+        router_id.format(id=test_menu.id),
     )
     assert resp.status_code == 200
     deleted_menu = await async_session_test.\
-                    get(Menu, menu.id)
+                    get(Menu, test_menu.id)
     assert deleted_menu == None
     assert resp.json() == {
         'status': True,

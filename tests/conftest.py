@@ -20,7 +20,7 @@ SQLALCHEMY_TEST_DATABASE_URL = (
 )
 
 engine_test = create_async_engine(
-    SQLALCHEMY_TEST_DATABASE_URL, echo=True, pool_pre_ping=True
+    SQLALCHEMY_TEST_DATABASE_URL, echo=True 
 )
 
 async_session_test_maker = sessionmaker(bind=engine_test, class_=AsyncSession,
@@ -78,6 +78,20 @@ async def test_submenu(async_session_test, test_menu):
     await async_session_test.commit()
     await async_session_test.refresh(submenu)
     return submenu
+
+
+@fixture
+async def test_dish(async_session_test, test_submenu):
+    dish = Dish(
+        title="My test submenu",
+        description="Test submenu description",
+        price = 99.99,
+        submenu_id = test_submenu.id
+    )
+    async_session_test.add(dish)
+    await async_session_test.commit()
+    await async_session_test.refresh(dish)
+    return dish
 
 
 def menu_to_dict(menu: Menu):
