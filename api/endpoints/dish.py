@@ -11,13 +11,13 @@ from uuid import UUID
 router = APIRouter()
 
 
-@router.get("", response_model=List[SchemasDish])
+@router.get("/", response_model=List[SchemasDish])
 async def get_dishes(session: AsyncSession = Depends(get_session)):
     dishes = await session.execute(select(Dish))
     return dishes.scalars().fetchall()
 
 
-@router.post("", response_model=SchemasDish, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=SchemasDish, status_code=status.HTTP_201_CREATED)
 async def create_dish(
     submenu_id: UUID, dish: SchemasCreateUpdateDish,
     session: AsyncSession = Depends(get_session)

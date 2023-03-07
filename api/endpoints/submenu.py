@@ -11,13 +11,13 @@ from uuid import UUID
 router = APIRouter()
 
 
-@router.get("", response_model=List[SchemasSubMenu])
+@router.get("/", response_model=List[SchemasSubMenu])
 async def get_submenus(session: AsyncSession = Depends(get_session)):
     submenus = await session.execute(select(Submenu))
     return submenus.scalars().fetchall()
 
 
-@router.post("", response_model=SchemasSubMenu, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=SchemasSubMenu, status_code=status.HTTP_201_CREATED)
 async def create_submenu(
     menu_id: UUID, submenu: SchemaBase, session: AsyncSession = Depends(get_session)
     ):

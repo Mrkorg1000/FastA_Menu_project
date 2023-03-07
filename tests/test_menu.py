@@ -15,7 +15,7 @@ router_id = 'api/v1/menus/{id}'
 # 7. Удаление меню. 
 
 async def test_get_empty_menu_list(client):
-    resp = await client.get(router)
+    resp = await client.get(router, follow_redirects=True)
     assert resp.status_code == 200
     assert resp.json() == []
     
@@ -24,6 +24,7 @@ async def test_create_menu(client, async_session_test):
     resp = await client.post(
         router,
         json={'title': 'My menu', 'description': 'My menu description'},
+        follow_redirects=True
     )
     assert resp.status_code == 201
     menu_id = resp.json()["id"]
@@ -32,7 +33,7 @@ async def test_create_menu(client, async_session_test):
 
 
 async def test_get_menu_list(client, test_menu):
-    resp = await client.get(router)
+    resp = await client.get(router, follow_redirects=True)
     assert resp.status_code == 200
     assert resp.json() == [menu_to_dict(test_menu)]
     

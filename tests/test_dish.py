@@ -15,8 +15,12 @@ router_id = 'api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{id}'
 
 
 
-async def test_get_empty_dish_list(client,   test_submenu):
-    resp = await client.get(router.format(menu_id=test_submenu.menu_id, submenu_id=test_submenu.id))
+async def test_get_empty_dish_list(client, test_submenu):
+    resp = await client.get(
+        router.format(menu_id=test_submenu.menu_id,
+        submenu_id=test_submenu.id),
+        follow_redirects=True
+    )
     assert resp.status_code == 200
     assert resp.json() == []
 
@@ -27,6 +31,7 @@ async def test_create_dish(client, async_session_test, test_submenu):
         json={'title': 'My super dish', 'description': 'My super dish description',
               'price': '12.50',
         },
+        follow_redirects=True
     )
     assert resp.status_code == 201
     dish_id = resp.json()["id"]
@@ -35,8 +40,10 @@ async def test_create_dish(client, async_session_test, test_submenu):
 
 
 async def test_get_dish_list(client, test_submenu, test_dish):
-    resp = await client.get(router.format(
-        menu_id=test_submenu.menu_id, submenu_id=test_submenu.id)
+    resp = await client.get(
+        router.format(menu_id=test_submenu.menu_id,
+        submenu_id=test_submenu.id),
+        follow_redirects=True
     )
     assert resp.status_code == 200
     assert resp.json() == [dish_to_dict(test_dish)]

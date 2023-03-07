@@ -16,7 +16,10 @@ router_id = 'api/v1/menus/{menu_id}/submenus/{id}'
 # 7. Удаление подменю.
 
 async def test_get_empty_submenu_list(client, test_menu):
-    resp = await client.get(router.format(menu_id=test_menu.id))
+    resp = await client.get(
+        router.format(menu_id=test_menu.id),
+        follow_redirects=True                   
+    )
     assert resp.status_code == 200
     assert resp.json() == []
 
@@ -26,7 +29,8 @@ async def test_create_submenu(client, async_session_test, test_menu):
         router.format(menu_id=test_menu.id),
         json={'title': 'My submenu',
               'description': 'My submenu description',
-              },    
+              },
+        follow_redirects=True    
     )
     assert resp.status_code == 201
     submenu_id = resp.json()["id"]
@@ -35,7 +39,10 @@ async def test_create_submenu(client, async_session_test, test_menu):
 
 
 async def test_get_submenu_list(client, test_submenu):
-    resp = await client.get(router.format(menu_id=test_submenu.menu_id))
+    resp = await client.get(
+        router.format(menu_id=test_submenu.menu_id),
+        follow_redirects=True
+    )
     assert resp.status_code == 200
     assert resp.json() == [submenu_to_dict(test_submenu)]
 
@@ -51,7 +58,7 @@ async def test_get_submenu_by_id(client, test_submenu):
 async def test_submenu_not_found(client, test_submenu):
     test_id = uuid.uuid4()
     resp = await client.get(
-        router_id.format(menu_id=test_submenu.menu_id, id=test_id)
+        router_id.format(menu_id=test_submenu.menu_id, id=test_id),
     )
     assert resp.status_code == 404
     assert resp.json() == {'detail': 'submenu not found'}
