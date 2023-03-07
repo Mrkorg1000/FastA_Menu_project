@@ -1,4 +1,5 @@
 from conftest import *
+from sqlalchemy import select
 from database.models import Menu, Submenu, Dish
 import uuid
 
@@ -14,73 +15,66 @@ router_id = 'api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{id}'
 
 
 
-def test_get_empty_dish_list(client, test_menu, test_submenu):
-    resp = client.get(router.format(menu_id=test_menu.id, submenu_id=test_submenu.id))
+async def test_get_empty_dish_list(client, test_submenu):
+    resp = await client.get(
+        router.format(menu_id=test_submenu.menu_id,
+        submenu_id=test_submenu.id),
+        follow_redirects=True
+    )
     assert resp.status_code == 200
     assert resp.json() == []
 
 
-def test_create_dish(client, session_test, test_menu, test_submenu):
-    resp = client.post(
-        router.format(menu_id=test_menu.id, submenu_id=test_submenu.id),
+async def test_create_dish(client, async_session_test, test_submenu):
+    resp = await client.post(
+        router.format(menu_id=test_submenu.menu_id, submenu_id=test_submenu.id),
         json={'title': 'My super dish', 'description': 'My super dish description',
               'price': '12.50',
         },
+        follow_redirects=True
     )
     assert resp.status_code == 201
     dish_id = resp.json()["id"]
-    dish = session_test.query(Dish).\
-        filter(Dish.id==dish_id).first()
+    dish = await async_session_test.get(Dish, dish_id)
     assert resp.json() == dish_to_dict(dish)
 
 
-def test_get_dish_list(client, session_test):
-    submenu = session_test.query(Submenu).one()
-    menu = session_test.query(Menu).one()
-    resp = client.get(router.format(
-        menu_id=menu.id, submenu_id=submenu.id)
+async def test_get_dish_list(client, test_submenu, test_dish):
+    resp = await client.get(
+        router.format(menu_id=test_submenu.menu_id,
+        submenu_id=test_submenu.id),
+        follow_redirects=True
     )
     assert resp.status_code == 200
-    dish_list = session_test.query(Dish).all()
-    assert resp.json() == [dish_to_dict(dish)
-                           for dish in dish_list]
+    assert resp.json() == [dish_to_dict(test_dish)]
 
 
-def test_get_dish_by_id(client, session_test):
-    dish = session_test.query(Dish).one()
-    submenu = session_test.query(Submenu).one()
-    menu = session_test.query(Menu).one()
-
-    resp = client.get(
-        router_id.format(menu_id=menu.id, submenu_id=submenu.id,
-        id=dish.id)
+async def test_get_dish_by_id(client, test_submenu, test_dish):
+    resp = await client.get(
+        router_id.format(menu_id=test_submenu.menu_id, submenu_id=test_submenu.id,
+        id=test_dish.id)
     )
     assert resp.status_code == 200
-    assert resp.json() == dish_to_dict(dish)
+    assert resp.json() == dish_to_dict(test_dish)
 
 
-def test_dish_not_found(client, session_test):
-    submenu = session_test.query(Submenu).one()
-    menu = session_test.query(Menu).one()
+async def test_dish_not_found(client, test_submenu):
     test_dish_id = uuid.uuid4()
-    resp = client.get(
+    resp = await client.get(
         router_id.format(
-            menu_id=menu.id,
-            submenu_id=submenu.id, id=test_dish_id
+            menu_id=test_submenu.menu_id,
+            submenu_id=test_submenu.id, id=test_dish_id
         )
     )
     assert resp.status_code == 404
     assert resp.json() == {'detail': 'dish not found'}
 
 
-def test_update_dish(client, session_test):
-    submenu = session_test.query(Submenu).one()
-    menu = session_test.query(Menu).one()
-    dish = session_test.query(Dish).one()
-    resp = client.patch(
+async def test_update_dish(client, async_session_test, test_submenu, test_dish):
+     resp = await client.patch(
         router_id.format(
-            menu_id=menu.id,
-            submenu_id=submenu.id, id=dish.id
+            menu_id=test_submenu.menu_id,
+            submenu_id=test_submenu.id, id=test_dish.id
         ),
         json={
             'title': 'My updated dish',
@@ -88,25 +82,20 @@ def test_update_dish(client, session_test):
             'price': '14.50',
         },
     )
-    assert resp.status_code == 200
-    updated_dish = session_test.query(Dish).\
-        filter(Dish.id == dish.id).first()
-    assert resp.json() == dish_to_dict(updated_dish)
+     assert resp.status_code == 200
+     updated_dish = await async_session_test.get(Dish, test_dish.id)
+     assert resp.json() == dish_to_dict(updated_dish)
 
 
-def test_delete_dish(client, session_test):
-    submenu = session_test.query(Submenu).one()
-    menu = session_test.query(Menu).one()
-    dish = session_test.query(Dish).one()
-    resp = client.delete(
+async def test_delete_dish(client, async_session_test, test_submenu, test_dish):
+    resp = await client.delete(
         router_id.format(
-            menu_id=menu.id,
-            submenu_id=submenu.id, id=dish.id
+            menu_id=test_submenu.menu_id,
+            submenu_id=test_submenu.id, id=test_dish.id
         )
     )
     assert resp.status_code == 200
-    deleted_dish = session_test.query(Dish).\
-        filter(Dish.id == dish.id).first()
+    deleted_dish = await async_session_test.get(Dish, test_dish.id)
     assert deleted_dish == None
     assert resp.json() == {
         'status': True,

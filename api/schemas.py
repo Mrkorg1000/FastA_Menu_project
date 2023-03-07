@@ -24,8 +24,8 @@ class SchemasSubMenu(SchemaBase):
 
 class SchemasDish(SchemaBase):
     id: UUID
-    price: str
+    price: float
 
 
 class SchemasCreateUpdateDish(SchemaBase):
-    price: str
+    price: float

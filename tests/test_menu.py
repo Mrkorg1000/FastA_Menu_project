@@ -1,4 +1,5 @@
 from conftest import *
+from sqlalchemy import select
 from database.models import Menu
 import uuid
 
@@ -13,79 +14,69 @@ router_id = 'api/v1/menus/{id}'
 # 6. Изменеие меню
 # 7. Удаление меню. 
 
-def test_get_empty_menu_list(client):
-    resp = client.get(router)
+async def test_get_empty_menu_list(client):
+    resp = await client.get(router, follow_redirects=True)
     assert resp.status_code == 200
     assert resp.json() == []
     
 
-def test_create_menu(client, session_test):
-    resp = client.post(
+async def test_create_menu(client, async_session_test):
+    resp = await client.post(
         router,
         json={'title': 'My menu', 'description': 'My menu description'},
+        follow_redirects=True
     )
     assert resp.status_code == 201
     menu_id = resp.json()["id"]
-    menu = session_test.query(Menu).\
-        filter(Menu.id == menu_id).first()
+    menu = await async_session_test.get(Menu, menu_id)
     assert resp.json() == menu_to_dict(menu)
 
 
-def test_get_menu_list(client, session_test):
-    resp = client.get(router)
+async def test_get_menu_list(client, test_menu):
+    resp = await client.get(router, follow_redirects=True)
     assert resp.status_code == 200
-    menu_list = session_test.query(Menu).all()
-    assert resp.json() == [menu_to_dict(menu) for menu in menu_list]
+    assert resp.json() == [menu_to_dict(test_menu)]
     
 
-def test_get_menu_by_id(client, session_test):
-    menu = session_test.query(Menu).one()
-    resp = client.get(
-        router_id.format(id=menu.id),
+async def test_get_menu_by_id(client, test_menu):
+    resp = await client.get(
+        router_id.format(id=test_menu.id),
     )
     assert resp.status_code == 200
-    assert resp.json() == menu_to_dict(menu)
+    assert resp.json() == menu_to_dict(test_menu)
 
 
-def test_menu_not_found(client):
+async def test_menu_not_found(client):
     test_id = uuid.uuid4()
-    resp = client.get(
+    resp = await client.get(
         router_id.format(id=test_id),
     )
     assert resp.status_code == 404
     assert resp.json() == {'detail': 'menu not found'}
 
-
-def test_update_menu(client, session_test):
-    menu = session_test.query(Menu).one()
-    resp = client.patch(
-        router_id.format(id=menu.id),
+async def test_update_menu(client, async_session_test, test_menu):
+    resp = await client.patch(
+        router_id.format(id=test_menu.id),
         json={
             'title': 'My updated menu',
             'description': 'My updated menu description',
         },
     )
     assert resp.status_code == 200
-    updated_menu = session_test.query(Menu).\
-        filter(Menu.id==menu.id).first()
+    updated_menu = await async_session_test.\
+                    get(Menu, test_menu.id)   
     assert resp.json() == menu_to_dict(updated_menu)
     
 
-def test_delete_menu(client, session_test):
-    menu = session_test.query(Menu).one()
-    resp = client.delete(
-        router_id.format(id=menu.id),
+async def test_delete_menu(client, async_session_test, test_menu):
+    resp = await client.delete(
+        router_id.format(id=test_menu.id),
     )
     assert resp.status_code == 200
-    deleted_menu = session_test.query(Menu).\
-        filter(Menu.id == menu.id).first()
+    deleted_menu = await async_session_test.\
+                    get(Menu, test_menu.id)
     assert deleted_menu == None
     assert resp.json() == {
         'status': True,
         'message': 'The menu has been deleted',
      }
-
-
-
-
-
