@@ -59,11 +59,11 @@ async def test_get_dish_by_id(client, test_submenu, test_dish):
 
 
 async def test_dish_not_found(client, test_submenu):
-    test_dish_id = uuid.uuid4()
+    
     resp = await client.get(
         router_id.format(
             menu_id=test_submenu.menu_id,
-            submenu_id=test_submenu.id, id=test_dish_id
+            submenu_id=test_submenu.id, id=10
         )
     )
     assert resp.status_code == 404

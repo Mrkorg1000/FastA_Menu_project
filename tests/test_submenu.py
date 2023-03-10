@@ -56,9 +56,9 @@ async def test_get_submenu_by_id(client, test_submenu):
 
 
 async def test_submenu_not_found(client, test_submenu):
-    test_id = uuid.uuid4()
+    
     resp = await client.get(
-        router_id.format(menu_id=test_submenu.menu_id, id=test_id),
+        router_id.format(menu_id=test_submenu.menu_id, id=10),
     )
     assert resp.status_code == 404
     assert resp.json() == {'detail': 'submenu not found'}
