@@ -20,5 +20,9 @@ async_session_maker = sessionmaker(bind=engine,
 
 async def get_session() -> AsyncGenerator: 
     async with async_session_maker() as session:
-        yield session
+        # yield session
+        try:
+            yield session
+        finally:
+            await session.close()
         

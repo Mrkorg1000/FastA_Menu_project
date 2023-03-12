@@ -41,8 +41,8 @@ async def async_session_test() -> AsyncGenerator:
     
         async with async_session_test_maker(bind=conn) as session_test:
             yield session_test
-            await session_test.flush()
-            await session_test.rollback()
+            # await session_test.flush()
+            # await session_test.rollback()
         
            
 @fixture
@@ -95,7 +95,7 @@ async def test_dish(async_session_test, test_submenu):
 
 def menu_to_dict(menu: Menu):
     return {
-        'id': str(menu.id),
+        'id': int(menu.id),
         'title': str(menu.title),
         'description': str(menu.description),
         'submenus_count': menu.submenus_count,
@@ -105,7 +105,7 @@ def menu_to_dict(menu: Menu):
 
 def submenu_to_dict(submenu: Submenu):
     return {
-        'id': str(submenu.id),
+        'id': int(submenu.id),
         'title': str(submenu.title),
         'description': str(submenu.description),
         'dishes_count': submenu.dishes_count,
@@ -114,8 +114,22 @@ def submenu_to_dict(submenu: Submenu):
 
 def dish_to_dict(dish: Dish):
     return {
-        'id': str(dish.id),
+        'id': int(dish.id),
         'title': str(dish.title),
         'description': str(dish.description),
         'price': float(dish.price),
     }
+
+@fixture
+async def menus_for_pagination(async_session_test):
+    menu_list = []
+    for i in range(1, 6):
+        menu = Menu(
+        title = f"My test menu {i}",
+        description = f"Test menu description {i}"
+        )
+        async_session_test.add(menu)
+        await async_session_test.commit()
+        await async_session_test.refresh(menu)
+        menu_list.append(menu)
+    return menu_list
