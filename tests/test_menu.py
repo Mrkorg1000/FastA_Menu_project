@@ -5,6 +5,7 @@ import uuid
 
 router = '/api/v1/menus'
 router_id = 'api/v1/menus/{id}'
+pagination_router = '/api/v1/menus/?offset={offset}&limit={limit}'
 
 
 # Тестовый сценарий: Исходное состояние -> БД пустая.
@@ -82,7 +83,16 @@ async def test_delete_menu(client, async_session_test, test_menu):
 
 
 async def test_pagination_order(client, menus_for_pagination):
-    for _ in range(100):
-        resp = await client.get(router, follow_redirects=True)
-        assert resp.status_code == 200
-        assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination][:4]
+    resp = await client.get(
+        pagination_router.format(offset=0, limit=3),
+        follow_redirects=True
+    )
+    assert resp.status_code == 200
+    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination][:3]
+
+    resp = await client.get(
+        pagination_router.format(offset=3, limit=3),
+        follow_redirects=True
+    )
+    assert resp.status_code == 200
+    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination][3:]
