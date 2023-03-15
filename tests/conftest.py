@@ -82,8 +82,8 @@ async def test_submenu(async_session_test, test_menu):
 @fixture
 async def test_dish(async_session_test, test_submenu):
     dish = Dish(
-        title="My test submenu",
-        description="Test submenu description",
+        title="My test dish",
+        description="Test submenu dish",
         price = 99.99,
         submenu_id = test_submenu.id
     )
@@ -123,7 +123,7 @@ def dish_to_dict(dish: Dish):
 @fixture
 async def menus_for_pagination(async_session_test):
     menu_list = []
-    for i in range(1, 6):
+    for i in range(1, 16):
         menu = Menu(
         title = f"My test menu {i}",
         description = f"Test menu description {i}"
@@ -133,3 +133,37 @@ async def menus_for_pagination(async_session_test):
         await async_session_test.refresh(menu)
         menu_list.append(menu)
     return menu_list
+
+
+@fixture
+async def submenus_for_pagination(async_session_test, test_menu):
+    submenu_list = []
+    for i in range(1, 16):
+        submenu = Submenu(
+        title = f"My test submenu {i}",
+        description = f"Test submenu description {i}",
+        menu_id = test_menu.id
+        )
+        async_session_test.add(submenu)
+        await async_session_test.commit()
+        await async_session_test.refresh(submenu)
+        submenu_list.append(submenu)
+    return submenu_list
+
+
+@fixture
+async def dishes_for_pagination(async_session_test, test_submenu):
+    dish_list = []
+    for i in range(1, 16):
+        dish = Dish(
+        title = f"My test dish {i}",
+        description = f"Test dish description {i}",
+        price = 99.99,
+        submenu_id = test_submenu.id
+        )
+        async_session_test.add(dish)
+        await async_session_test.commit()
+        await async_session_test.refresh(dish)
+        dish_list.append(dish)
+    return dish_list, test_submenu.menu_id, test_submenu.id
+

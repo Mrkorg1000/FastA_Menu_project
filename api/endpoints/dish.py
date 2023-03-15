@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[SchemasDish])
 async def get_dishes(session: AsyncSession = Depends(get_session),
-                     offset: int=0, limit: int = 2):
+                     offset: int=0, limit: int = 10):
     dishes = await session.execute(
         select(Dish).order_by(Dish.id).\
             offset(offset).limit(limit)

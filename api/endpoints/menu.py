@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[SchemasMenu])
 async def get_menus(session: AsyncSession = Depends(get_session),
-                     offset: int=0, limit: int = 3):
+                     offset: int=0, limit: int = 10):
     menus = await session.execute(
         select(Menu).order_by(Menu.id).\
             offset(offset).limit(limit)

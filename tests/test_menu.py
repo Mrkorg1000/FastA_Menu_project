@@ -82,17 +82,17 @@ async def test_delete_menu(client, async_session_test, test_menu):
      }
 
 
-async def test_pagination_order(client, menus_for_pagination):
+async def test_menu_pagination_order(client, menus_for_pagination):
     resp = await client.get(
-        pagination_router.format(offset=0, limit=3),
+        pagination_router.format(offset=0, limit=10),
         follow_redirects=True
     )
     assert resp.status_code == 200
-    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination][:3]
+    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination][:10]
 
     resp = await client.get(
-        pagination_router.format(offset=3, limit=3),
+        pagination_router.format(offset=10, limit=10),
         follow_redirects=True
     )
     assert resp.status_code == 200
-    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination][3:]
+    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination][10:]
