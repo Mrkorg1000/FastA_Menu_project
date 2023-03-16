@@ -9,12 +9,12 @@ Base = declarative_base()
 
 class Dish(Base):
     __tablename__ = 'dish'
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     price = Column(Float)
     submenu_id = Column(
-        UUID(as_uuid=True),
+        Integer,
         ForeignKey("submenu.id", ondelete="CASCADE")
     )
     submenu = relationship(
@@ -23,11 +23,11 @@ class Dish(Base):
 
 class Submenu(Base):
     __tablename__ = 'submenu'
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     menu_id = Column(
-        UUID(as_uuid=True),
+        Integer,
         ForeignKey("menu.id", ondelete="CASCADE")
     )
     
@@ -50,7 +50,7 @@ class Submenu(Base):
 
 class Menu(Base):
     __tablename__ = 'menu'
-    id = Column(UUID(as_uuid=True), primary_key = True, default=uuid.uuid4)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     submenus_count: MapperProperty = column_property(

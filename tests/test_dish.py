@@ -5,6 +5,7 @@ import uuid
 
 router = '/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes'
 router_id = 'api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{id}'
+pagination_router = 'api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/?offset=    {offset}&limit={limit}'
 
 # Тестовый сценарий: Исходное состояние -> БД пустая.
 # 1. Вывод пустого списка блюд. 2. Создание блюда.
@@ -59,11 +60,11 @@ async def test_get_dish_by_id(client, test_submenu, test_dish):
 
 
 async def test_dish_not_found(client, test_submenu):
-    test_dish_id = uuid.uuid4()
+    
     resp = await client.get(
         router_id.format(
             menu_id=test_submenu.menu_id,
-            submenu_id=test_submenu.id, id=test_dish_id
+            submenu_id=test_submenu.id, id=10
         )
     )
     assert resp.status_code == 404
@@ -103,4 +104,26 @@ async def test_delete_dish(client, async_session_test, test_submenu, test_dish):
     }
 
 
+async def test_dish_pagination_order(client, dishes_for_pagination):
+    resp = await client.get(
+        pagination_router.format(
+        menu_id = dishes_for_pagination[0].submenu.menu_id,
+        submenu_id = dishes_for_pagination[0].submenu_id,
+        offset=0, limit=10
+        ),
+        follow_redirects=True
+    )
+    assert resp.status_code == 200
+    assert resp.json() == [dish_to_dict(test_dish) for test_dish in dishes_for_pagination[:10]]
+
+    resp = await client.get(
+        pagination_router.format(
+        menu_id = dishes_for_pagination[0].submenu.menu_id,
+        submenu_id = dishes_for_pagination[0].submenu_id,
+        offset=10, limit=10
+        ),
+        follow_redirects=True
+    )
+    assert resp.status_code == 200
+    assert resp.json() == [dish_to_dict(test_dish) for test_dish in dishes_for_pagination[10:]]
 

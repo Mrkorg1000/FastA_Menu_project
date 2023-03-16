@@ -5,6 +5,7 @@ import uuid
 
 router = '/api/v1/menus'
 router_id = 'api/v1/menus/{id}'
+pagination_router = '/api/v1/menus/?offset={offset}&limit={limit}'
 
 
 # Тестовый сценарий: Исходное состояние -> БД пустая.
@@ -47,9 +48,8 @@ async def test_get_menu_by_id(client, test_menu):
 
 
 async def test_menu_not_found(client):
-    test_id = uuid.uuid4()
     resp = await client.get(
-        router_id.format(id=test_id),
+        router_id.format(id=10),
     )
     assert resp.status_code == 404
     assert resp.json() == {'detail': 'menu not found'}
@@ -80,3 +80,19 @@ async def test_delete_menu(client, async_session_test, test_menu):
         'status': True,
         'message': 'The menu has been deleted',
      }
+
+
+async def test_menu_pagination_order(client, menus_for_pagination):
+    resp = await client.get(
+        pagination_router.format(offset=0, limit=10),
+        follow_redirects=True
+    )
+    assert resp.status_code == 200
+    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination[:10]]
+
+    resp = await client.get(
+        pagination_router.format(offset=10, limit=10),
+        follow_redirects=True
+    )
+    assert resp.status_code == 200
+    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination[10:]]

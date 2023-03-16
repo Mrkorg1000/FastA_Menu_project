@@ -12,14 +12,18 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[SchemasDish])
-async def get_dishes(session: AsyncSession = Depends(get_session)):
-    dishes = await session.execute(select(Dish))
+async def get_dishes(session: AsyncSession = Depends(get_session),
+                     offset: int=0, limit: int = 10):
+    dishes = await session.execute(
+        select(Dish).order_by(Dish.id).\
+            offset(offset).limit(limit)
+    )
     return dishes.scalars().fetchall()
 
 
 @router.post("/", response_model=SchemasDish, status_code=status.HTTP_201_CREATED)
 async def create_dish(
-    submenu_id: UUID, dish: SchemasCreateUpdateDish,
+    submenu_id: int, dish: SchemasCreateUpdateDish,
     session: AsyncSession = Depends(get_session)
 ):
     new_dish = Dish(**dish.dict())
@@ -32,7 +36,7 @@ async def create_dish(
 
 
 @router.get("/{id}", response_model=SchemasDish)
-async def get_single_dish(id: UUID, session: AsyncSession = Depends(get_session)):
+async def get_single_dish(id: int, session: AsyncSession = Depends(get_session)):
     single_dish = await session.get(Dish, id)
     if not single_dish:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -42,7 +46,7 @@ async def get_single_dish(id: UUID, session: AsyncSession = Depends(get_session)
 
 
 @router.patch("/{id}", response_model=SchemasDish)
-async def update_dish(id: UUID, dish: SchemasCreateUpdateDish,
+async def update_dish(id: int, dish: SchemasCreateUpdateDish,
                    session: AsyncSession = Depends(get_session)):
     db_dish = await session.get(Dish, id)
 
@@ -60,7 +64,7 @@ async def update_dish(id: UUID, dish: SchemasCreateUpdateDish,
 
 
 @router.delete("/{id}")
-async def delete_single_dish(id: UUID, session: AsyncSession = Depends(get_session)):
+async def delete_single_dish(id: int, session: AsyncSession = Depends(get_session)):
     single_dish = await session.get(Dish, id)
     if not single_dish:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

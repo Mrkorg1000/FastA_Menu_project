@@ -12,18 +12,18 @@ class SchemaBase(BaseModel):
 
 
 class SchemasMenu(SchemaBase):
-    id: UUID
+    id: int
     submenus_count: int
     dishes_count: int
 
 
 class SchemasSubMenu(SchemaBase):
-    id: UUID
+    id: int
     dishes_count: int
 
 
 class SchemasDish(SchemaBase):
-    id: UUID
+    id: int
     price: float
 
 

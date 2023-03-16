@@ -12,9 +12,13 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[SchemasMenu])
-async def get_menus(session: AsyncSession = Depends(get_session)):
-    menus = await session.execute(select(Menu))
-    return menus.scalars().fetchall()
+async def get_menus(session: AsyncSession = Depends(get_session),
+                     offset: int=0, limit: int = 10):
+    menus = await session.execute(
+        select(Menu).order_by(Menu.id).\
+            offset(offset).limit(limit)
+    )
+    return menus.scalars().fetchall() 
 
 
 @router.post("/", response_model=SchemasMenu, status_code=status.HTTP_201_CREATED)
@@ -28,7 +32,7 @@ async def create_menu(menu: SchemaBase, session: AsyncSession = Depends(get_sess
 
 
 @router.get("/{id}", response_model=SchemasMenu)  
-async def get_single_menu(id: UUID, session: AsyncSession = Depends(get_session)):
+async def get_single_menu(id: int, session: AsyncSession = Depends(get_session)):
     single_menu = await session.get(Menu, id)
     if not single_menu:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -38,7 +42,7 @@ async def get_single_menu(id: UUID, session: AsyncSession = Depends(get_session)
 
 
 @router.patch("/{id}", response_model=SchemasMenu)
-async def update_menu(id: UUID, menu: SchemaBase,
+async def update_menu(id: int, menu: SchemaBase,
                     session: AsyncSession = Depends(get_session)):
     db_menu = await session.get(Menu, id)
     if not db_menu:
@@ -56,7 +60,7 @@ async def update_menu(id: UUID, menu: SchemaBase,
 
 
 @router.delete("/{id}")
-async def delete_single_menu(id: UUID, session: AsyncSession = Depends(get_session)):
+async def delete_single_menu(id: int, session: AsyncSession = Depends(get_session)):
     single_menu = await session.get(Menu, id)
     if not single_menu:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
