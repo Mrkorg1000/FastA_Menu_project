@@ -88,11 +88,11 @@ async def test_menu_pagination_order(client, menus_for_pagination):
         follow_redirects=True
     )
     assert resp.status_code == 200
-    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination][:10]
+    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination[:10]]
 
     resp = await client.get(
         pagination_router.format(offset=10, limit=10),
         follow_redirects=True
     )
     assert resp.status_code == 200
-    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination][10:]
+    assert resp.json() == [menu_to_dict(test_menu) for test_menu in menus_for_pagination[10:]]

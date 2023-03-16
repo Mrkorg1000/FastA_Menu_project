@@ -165,5 +165,5 @@ async def dishes_for_pagination(async_session_test, test_submenu):
         await async_session_test.commit()
         await async_session_test.refresh(dish)
         dish_list.append(dish)
-    return dish_list, test_submenu.menu_id, test_submenu.id
+    return dish_list #, test_submenu.menu_id, test_submenu.id
 
