@@ -12,7 +12,7 @@ class Price(Base):
     __tablename__ = 'price'
     id = Column(Integer, primary_key=True, autoincrement=True)
     dish_price = Column(Float, nullable=False)
-    validity_start = Column(Date, nullable=False)
+    validity_start = Column(Date, nullable=False, default='1970-01-01')
     validity_end = Column(Date, nullable=False)
     dish_id = Column(
         Integer,
